@@ -1,0 +1,37 @@
+// Author = Akbar Kasri
+
+study("Price Crossing EMA with MACD Filter", overlay=true)
+
+//Variable Input
+length = input(30, title="EMA Length")
+
+//Calculate EMA and MACD
+ema = ema(close, length)
+fastLength = 12
+slowLength = 26
+signalLength = 9
+fastEMA = ema(close, fastLength)
+slowEMA = ema(close, slowLength)
+macd = fastEMA - slowEMA
+signal = sma(macd, signalLength)
+histogram = macd - signal
+
+//Condition
+crossUp = crossover(close, ema)
+crossDown = crossunder(close, ema)
+macdFilterUp = histogram > 0 
+macdFilterDown = histogram < 0 
+
+//Plotting
+plot(ema, color=red, title="EMA")
+plot(close, title="Close")
+barcolor(histogram > 0 ? #00FF00 : #FF0000)
+plot(histogram, color=blue, title="MACD")
+
+//Signal
+
+plotshape(crossUp and macdFilterUp, title="Buy Signal", text="Buy", style=shape.triangleup, location=location.belowbar, color=green)
+plotshape(crossDown and macdFilterDown, title="Sell Signal", text="Sell", style=shape.triangledown, location=location.abovebar, color=green)
+
+alertcondition(crossUp and macdFilterUp, title="Cross Up Alert", message="Price has crossed above EMA and MACD histogram is above zero.")
+alertcondition(crossDown and macdFilterDown, title="Cross Down Alert", message="Price has crossed below EMA and MACD histogram is above zero.")
